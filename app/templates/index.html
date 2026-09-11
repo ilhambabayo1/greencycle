@@ -1,7 +1,7 @@
 ﻿{% extends "base.html" %}
 {% block title %}GreenCycle — Home{% endblock %}
 {% block content %}
-<h1>♻️ Recycle Item Tracker</h1>
+<h1>Recycle Item Tracker</h1>
 
 <section class="stats-grid">
   <div class="stat-card"><span class="stat-num" data-stat="items">{{ stats.total_items }}</span><span>Items</span></div>
@@ -58,7 +58,7 @@
     </tbody>
   </table>
   {% else %}
-  <p class="empty">No items yet. Add your first recycle item above! 🌱</p>
+  <p class="empty">No items yet. Add your first recycle item above!</p>
   {% endif %}
 </section>
 {% endblock %}

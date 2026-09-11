@@ -1,4 +1,4 @@
-﻿#  GreenCycle — FastAPI Web App
+﻿# GreenCycle — FastAPI Web App
 
 A recycle-item tracker built with **FastAPI + Jinja2 + SQLAlchemy**, fully containerized and ready to deploy on **Railway with Docker**.
 
@@ -34,7 +34,8 @@ greencycle-app/
 ```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload
-# open http://127.0.0.1:8000
+# open un it on my browser
+
 ```
 
 ## Run with Docker

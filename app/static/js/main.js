@@ -22,5 +22,5 @@ function showToast(message) {
 
 // Welcome toast on load
 window.addEventListener("DOMContentLoaded", () => {
-  if (window.location.pathname === "/") showToast("🌱 Welcome to GreenCycle!");
+  if (window.location.pathname === "/") showToast("Welcome to GreenCycle!");
 });
