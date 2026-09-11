@@ -1,0 +1,64 @@
+﻿{% extends "base.html" %}
+{% block title %}GreenCycle — Home{% endblock %}
+{% block content %}
+<h1>♻️ Recycle Item Tracker</h1>
+
+<section class="stats-grid">
+  <div class="stat-card"><span class="stat-num" data-stat="items">{{ stats.total_items }}</span><span>Items</span></div>
+  <div class="stat-card"><span class="stat-num" data-stat="weight">{{ '%.1f'|format(stats.total_weight_kg) }}</span><span>kg Recycled</span></div>
+  <div class="stat-card"><span class="stat-num" data-stat="points">{{ stats.total_points }}</span><span>Points</span></div>
+</section>
+
+<section class="card">
+  <h2>Add a Recycle Item</h2>
+  <form id="item-form" method="post" action="/items/create">
+    <label for="title">Title</label>
+    <input type="text" id="title" name="title" placeholder="e.g. Water bottles" required maxlength="120">
+
+    <label for="category">Category</label>
+    <select id="category" name="category" required>
+      {% for c in categories %}
+      <option value="{{ c }}">{{ c }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="weight">Weight (kg)</label>
+    <input type="number" id="weight" name="weight_kg" step="0.1" min="0" required>
+
+    <button type="submit" class="btn btn-primary">Add Item</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Logged Items</h2>
+  <div class="filters">
+    <a href="/" class="filter-chip {{ 'active' if not selected_category }}">All</a>
+    {% for c in categories %}
+    <a href="/?category={{ c }}" class="filter-chip {{ 'active' if selected_category == c }}">{{ c }}</a>
+    {% endfor %}
+  </div>
+
+  {% if items %}
+  <table id="items-table">
+    <thead><tr><th>Title</th><th>Category</th><th>Weight (kg)</th><th>Points</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.title }}</td>
+        <td><span class="badge">{{ item.category }}</span></td>
+        <td>{{ '%.2f'|format(item.weight_kg) }}</td>
+        <td>{{ item.points }}</td>
+        <td>
+          <form method="post" action="/items/{{ item.id }}/delete" class="inline-form">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No items yet. Add your first recycle item above! 🌱</p>
+  {% endif %}
+</section>
+{% endblock %}
