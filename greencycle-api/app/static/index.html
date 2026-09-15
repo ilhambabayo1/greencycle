@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Green Cycle — Smart Waste Sorter</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { min-height: 100vh; background: #14181f; color: #eef1f5; padding: 28px; }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 26px; }
+  header h1 { font-size: 2.8rem; letter-spacing: 1px; }
+  header h1 em { font-style: normal; color: #5ac8fa; }
+  header p { color: #9aa5b1; margin-top: 8px; font-size: 1.15rem; }
+  .robot-zone { display: flex; align-items: flex-end; justify-content: center; gap: 26px; margin-bottom: 28px; }
+  .robot { width: 150px; text-align: center; }
+  .head { width: 130px; height: 100px; margin: 0 auto; background: linear-gradient(180deg, #3a4552, #262e38); border: 3px solid #5ac8fa; border-radius: 22px; position: relative; }
+  .antenna { position: absolute; top: -26px; left: 50%; transform: translateX(-50%); width: 6px; height: 24px; background: #5ac8fa; }
+  .antenna::before { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; border-radius: 50%; background: #5ac8fa; }
+  .eyes { position: absolute; top: 30px; left: 0; right: 0; display: flex; justify-content: center; gap: 24px; }
+  .eye { width: 22px; height: 22px; background: #5ac8fa; border-radius: 50%; animation: blink 4s infinite; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+  .mouth { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); width: 56px; height: 14px; border: 3px solid #5ac8fa; border-top: none; border-radius: 0 0 28px 28px; }
+  .eating .mouth { animation: chomp .5s infinite alternate; }
+  @keyframes chomp { from { height: 12px; } to { height: 3px; } }
+  .body { width: 100px; height: 54px; margin: 6px auto 0; background: linear-gradient(180deg, #3a4552, #262e38); border: 3px solid #5ac8fa; border-radius: 14px 14px 10px 10px; display: flex; align-items: center; justify-content: center; }
+  .core { width: 26px; height: 26px; border-radius: 50%; background: #5ac8fa; box-shadow: 0 0 14px #5ac8fa; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+  .bubble { position: relative; background: #f5f7fa; color: #14181f; font-size: 1.4rem; font-weight: 700; padding: 18px 26px; border-radius: 18px; max-width: 440px; margin-bottom: 30px; }
+  .bubble::after { content: ''; position: absolute; left: -16px; bottom: 22px; border: 12px solid transparent; border-right-color: #f5f7fa; }
+  .card { background: #1d242e; border: 1px solid #33404f; border-radius: 18px; padding: 30px; }
+  #dropzone { border: 3px dashed #5ac8fa; border-radius: 16px; padding: 48px 20px; text-align: center; cursor: pointer; transition: background .2s; }
+  #dropzone:hover, #dropzone.drag { background: rgba(90,200,250,0.08); }
+  #dropzone h2 { font-size: 1.7rem; margin-bottom: 6px; }
+  #dropzone p { color: #9aa5b1; font-size: 1.05rem; }
+  #fileInput { display: none; }
+  .spinner { display: none; text-align: center; margin: 26px 0; color: #5ac8fa; font-size: 1.2rem; font-weight: 600; }
+  .spinner::after { content: ''; display: block; margin: 12px auto 0; width: 38px; height: 38px; border: 4px solid rgba(90,200,250,.25); border-top-color: #5ac8fa; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #preview { display: none; text-align: center; margin-top: 24px; }
+  #preview img { max-width: 300px; max-height: 300px; border-radius: 14px; border: 3px solid #5ac8fa; }
+  #result { display: none; margin-top: 28px; }
+  .verdict { display: flex; gap: 24px; align-items: center; background: #161c24; border: 1px solid #33404f; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .bin { width: 120px; height: 120px; flex-shrink: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; text-align: center; padding: 8px; }
+  .verdict .info { flex: 1; }
+  .verdict .info h2 { font-size: 2rem; text-transform: capitalize; }
+  .verdict .info .stream { font-size: 1.2rem; font-weight: 700; margin-top: 8px; }
+  .verdict .info .conf { color: #9aa5b1; font-size: 1.05rem; margin-top: 8px; }
+  .bar { height: 14px; background: #2a3441; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+  .bar > div { height: 100%; background: #5ac8fa; border-radius: 999px; width: 0; transition: width .8s ease; }
+  h3.sub { margin: 22px 0 12px; color: #9aa5b1; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; }
+  .row { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; font-size: 1.1rem; }
+  .row .name { width: 130px; text-transform: capitalize; }
+  .row .pct { width: 70px; text-align: right; color: #9aa5b1; }
+  .row .bar { flex: 1; margin-top: 0; }
+  .streams { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+  .stream-box { flex: 1; min-width: 130px; text-align: center; padding: 16px 10px; border-radius: 14px; border: 2px solid #2a3441; background: #161c24; opacity: .35; transition: all .4s; }
+  .stream-box.active { opacity: 1; transform: translateY(-4px); border-width: 3px; }
+  .stream-box .sname { font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; }
+  .stream-box .sdesc { font-size: .95rem; color: #9aa5b1; margin-top: 6px; }
+  #error { display: none; margin-top: 18px; background: rgba(246,90,90,.12); border: 2px solid rgba(246,90,90,.5); color: #ff9c9c; padding: 16px; border-radius: 12px; font-size: 1.05rem; }
+  footer { text-align: center; margin-top: 30px; color: #6b7683; font-size: 1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>SORT<em>&#8226;</em>BOT</h1>
+    <p>Upload a photo of any waste item — the robot sorts it into the right stream.</p>
+  </header>
+
+  <div class="robot-zone">
+    <div class="robot" id="robot">
+      <div class="head">
+        <div class="antenna"></div>
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="body"><div class="core"></div></div>
+    </div>
+    <div class="bubble" id="bubble">Feed me! Give me a photo of your waste and I will sort it.</div>
+  </div>
+
+  <div class="card">
+    <div id="dropzone">
+      <h2>Drop an image here</h2>
+      <p>or click to browse — jpg / png / webp</p>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+    </div>
+
+    <div id="preview"><img id="previewImg" alt="preview"></div>
+    <div class="spinner" id="spinner">Chewing on that image…</div>
+    <div id="error"></div>
+
+    <div id="result">
+      <div class="verdict">
+        <div class="bin" id="binIcon">—</div>
+        <div class="info">
+          <h2 id="predName">—</h2>
+          <div class="stream" id="predStream">—</div>
+          <div class="conf" id="predConf">—</div>
+          <div class="bar"><div id="confBar"></div></div>
+        </div>
+      </div>
+
+      <h3 class="sub">Where it goes in the cycle</h3>
+      <div class="streams" id="cycleRow"></div>
+
+      <h3 class="sub">Full confidence breakdown</h3>
+      <div id="allPreds"></div>
+    </div>
+  </div>
+
+  <footer>SORT-BOT · MobileNetV2 classifier · powered by FastAPI</footer>
+</div>
+<script>
+const STREAMS = {
+  plastic:    { bin: 'Recycling', color: '#f6c445', tip: 'Rinse it and drop it in the yellow recycling bin.' },
+  glass:      { bin: 'Recycling', color: '#f6c445', tip: 'Rinse it — glass is endlessly recyclable.' },
+  metal:      { bin: 'Recycling', color: '#f6c445', tip: 'Cans and metal scraps go to the yellow recycling bin.' },
+  paper:      { bin: 'Paper',     color: '#4a9df6', tip: 'Keep it dry — blue paper bin.' },
+  cardboard:  { bin: 'Paper',     color: '#4a9df6', tip: 'Flatten the box first, then the blue bin.' },
+  battery:    { bin: 'Hazardous', color: '#f65a5a', tip: 'Never in regular bins! Take it to a battery collection point.' },
+  biological: { bin: 'Compost',   color: '#5fd97a', tip: 'Food and organics go in the green compost bin.' },
+  clothes:    { bin: 'Textile',   color: '#b07df6', tip: 'Donate if wearable, otherwise textile recycling.' },
+  shoes:      { bin: 'Textile',   color: '#b07df6', tip: 'Donate usable shoes; recycling bins accept worn pairs.' },
+  trash:      { bin: 'Landfill',  color: '#9aa0a6', tip: 'Not recyclable — general waste bin.' }
+};
+const $ = id => document.getElementById(id);
+const dropzone = $('dropzone'), fileInput = $('fileInput');
+
+const streamOrder = ['Recycling', 'Paper', 'Compost', 'Textile', 'Hazardous', 'Landfill'];
+const streamDesc = { Recycling: 'plastic, glass, metal', Paper: 'paper, cardboard', Compost: 'food, organics', Textile: 'clothes, shoes', Hazardous: 'batteries', Landfill: 'general trash' };
+streamOrder.forEach(s => {
+  const sample = Object.values(STREAMS).find(v => v.bin === s);
+  const d = document.createElement('div');
+  d.className = 'stream-box'; d.dataset.stream = s;
+  d.innerHTML = '<div class="sname" style="color:' + sample.color + '">' + s + '</div>' +
+                '<div class="sdesc">' + streamDesc[s] + '</div>';
+  $('cycleRow').appendChild(d);
+});
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault(); dropzone.classList.remove('drag');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+function say(text) { $('bubble').textContent = text; }
+
+function handleFile(file) {
+  if (!file.type.startsWith('image/')) return showError('Please choose an image file.');
+  hideError(); $('result').style.display = 'none';
+
+  $('previewImg').src = URL.createObjectURL(file);
+  $('preview').style.display = 'block';
+  $('spinner').style.display = 'block';
+  $('robot').classList.add('eating');
+  say('Nom nom… processing…');
+
+  const fd = new FormData();
+  fd.append('file', file);
+  const started = performance.now();
+  fetch('/api/v1/predict', { method: 'POST', body: fd })
+    .then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.detail || r.statusText); }); return r.json(); })
+    .then(data => { data.inference_time_ms = Math.round(performance.now() - started); showResult(data); })
+    .catch(err => { say('Hmm, that did not taste right.'); showError('Prediction failed: ' + err.message); })
+    .finally(() => { $('spinner').style.display = 'none'; $('robot').classList.remove('eating'); });
+}
+
+function showResult(data) {
+  const top = data.top_prediction;
+  const s = STREAMS[top.class_name] || { bin: 'Unknown', color: '#9aa0a6', tip: '' };
+  const pct = (top.confidence * 100).toFixed(1);
+
+  $('predName').textContent = top.class_name;
+  $('predStream').textContent = 'Sorted into: ' + s.bin + ' — ' + s.tip;
+  $('predConf').textContent = pct + '% confident';
+  const binIcon = $('binIcon');
+  binIcon.textContent = s.bin.toUpperCase();
+  binIcon.style.background = s.color;
+  binIcon.style.color = '#14181f';
+  $('confBar').style.width = pct + '%';
+
+  document.querySelectorAll('.stream-box').forEach(el =>
+    el.classList.toggle('active', el.dataset.stream === s.bin));
+
+  $('allPreds').innerHTML = '';
+  data.all_predictions.forEach(p => {
+    const sp = STREAMS[p.class_name] || { color: '#5ac8fa' };
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = '<div class="name">' + p.class_name + '</div>' +
+      '<div class="bar"><div style="width:' + (p.confidence*100).toFixed(1) + '%;background:' + sp.color + '"></div></div>' +
+      '<div class="pct">' + (p.confidence*100).toFixed(1) + '%</div>';
+    $('allPreds').appendChild(row);
+  });
+
+  $('result').style.display = 'block';
+  say('Detected: ' + top.class_name + ' (' + pct + '%). It goes to the ' + s.bin + ' stream!');
+}
+
+function showError(msg) { const e = $('error'); e.textContent = msg; e.style.display = 'block'; }
+function hideError() { $('error').style.display = 'none'; }
+</script>
+
+</body>
+</html>

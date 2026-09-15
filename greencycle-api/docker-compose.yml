@@ -1,0 +1,20 @@
+﻿services:
+  greencycle-api:
+    build: .
+    container_name: greencycle-api
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_PATH: /app/models/my_model.keras
+      IMG_SIZE: "224"
+      MAX_FILE_SIZE_MB: "10"
+      PREPROCESS: mobilenet
+    volumes:
+      - ./models:/app/models:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/api/v1/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s

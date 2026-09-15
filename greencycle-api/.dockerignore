@@ -1,0 +1,14 @@
+﻿.git
+.gitignore
+__pycache__
+*.pyc
+.venv
+venv
+models
+*.keras
+*.h5
+.env
+tests
+README.md
+.ipynb_checkpoints
+*.ipynb
